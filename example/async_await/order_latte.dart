@@ -31,58 +31,46 @@ Future<String> getDollarAmount() =>
 
 main() async {
   try {
-    List<String> messages = [];
-    var reportOrderResult = await asyncStringEquals(
+    var messages = [];
+
+    messages
+      ..add(await asyncStringEquals(
         expected: 'Thanks! Your order is: almond milk',
         actual: await reportOrder(),
-        messages: messages
-    );
-
-    var getChangeResult = await asyncStringEquals(
+      ))
+      ..add(await asyncStringEquals(
         expected: 'Change due: 3.02',
         actual: await reportChange(),
-        messages: messages
-    );
-
-//    print(getChangeResult);
-//    print(reportOrderResult);
-
-    var passed =
-      (reportOrderResult[0] == true) &&
-      (getChangeResult[0] == true);
-
-    if (passed) {
+      ))
+    ..removeWhere((m) => m == 'no error');
+    if (messages.isEmpty) {
       _result(true);
     } else {
-      // convert potentially confusing errors to more user-friendly messages
       var readable = {
         'Change due: Instance of \'Future<String>\'': 'Looks like you forgot to use the await keyword!',
         'Change due: Instance of \'_Future<String>\'': 'Looks like you forgot to use the await keyword!'
       };
 
-      var userMessages = messages
-      ..where((message) => readable.containsKey(message))
-      ..map((message) => readable[message]).toList();
+      List<String> userMessages = messages
+        ..where((message) => readable.containsKey(message))
+        ..map((message) => readable[message]);
 
       _result(false, userMessages);
     }
-
   } catch (e) {
     _result(false, ['Tried to run solution, but received an exception: ${e}']);
   }
 }
 
-Future<List> asyncStringEquals({String expected, String actual, List<String> messages}) async {
+Future<String> asyncStringEquals({String expected, String actual}) async {
   try {
 //    print("Actual: $actual");
     if (expected == actual) {
-      return [true];
+      return 'no error';
     } else {
-      messages.add(actual);
-      return [false, messages];
+      return actual;
     }
   } catch(e) {
-    messages.add(e.toString());
-    return [false, messages];
+    return e.toString();
   }
 }
