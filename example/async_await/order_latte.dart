@@ -1,18 +1,21 @@
+void _result(bool success, [List<String> messages]) {
+  final joinedMessages = messages?.map((m) => m.toString())?.join(',') ?? '';
+  print('success: $success, "messages": $joinedMessages');
+}
 
-Future<String> getLatteOrder() async {
+///////////////////////////////////////////////
+//////DO NOT COPY ABOVE THIS COMMENT///////////
+///////////////////////////////////////////////
+
+Future<String> reportOrder() async {
   var order = await getUserOrder();
-  return 'Your order is: $order';
+  return 'Thanks! Your order is: $order';
 }
 
-Future<String> prepareLatte() async {
-  return await makeLatte();
-}
-
-Future<String> getChange() async {
+Future<String> reportChange() async {
   var change = await getDollarAmount();
-  return 'Your change is: $change';
+  return 'Change due: $change';
 }
-
 
 const order = 'almond milk';
 const change = '3.02';
@@ -26,51 +29,52 @@ Future<String> getUserOrder() =>
 Future<String> getDollarAmount() =>
     Future.delayed(twoSeconds, () => change);
 
-Future<String> makeLatte() =>
-    Future.delayed(threeSeconds, () => 'Thank you! Your $order latte is ready!');
-
-
 main() async {
   try {
     List<String> messages = [];
-
-    var getLatteResult = await asyncStringEquals(
-        expected: 'Your order is: almond milk',
-        actual: await getLatteOrder(),
-        messages: messages
-    );
-
-    var prepareLatteResult = await asyncStringEquals(
-        expected: 'Thank you! Your almond milk latte is ready!',
-        actual: await prepareLatte(),
+    var reportOrderResult = await asyncStringEquals(
+        expected: 'Thanks! Your order is: almond milk',
+        actual: await reportOrder(),
         messages: messages
     );
 
     var getChangeResult = await asyncStringEquals(
-        expected: 'Your change is: 3.02',
-        actual: await getChange(),
+        expected: 'Change due: 3.02',
+        actual: await reportChange(),
         messages: messages
     );
 
+//    print(getChangeResult);
+//    print(reportOrderResult);
+
     var passed =
-      (getLatteResult[0] == true) &&
-      (prepareLatteResult[0] == true) &&
+      (reportOrderResult[0] == true) &&
       (getChangeResult[0] == true);
 
     if (passed) {
       _result(true);
     } else {
-      _result(false, messages);
+      // convert potentially confusing errors to more user-friendly messages
+      var readable = {
+        'Change due: Instance of \'Future<String>\'': 'Looks like you forgot to use the await keyword!',
+        'Change due: Instance of \'_Future<String>\'': 'Looks like you forgot to use the await keyword!'
+      };
+
+      var userMessages = messages
+      ..where((message) => readable.containsKey(message))
+      ..map((message) => readable[message]).toList();
+
+      _result(false, userMessages);
     }
 
   } catch (e) {
-    _result(false, ['Tried to run solution, but received an exception: ${e.runtimeType}']);
+    _result(false, ['Tried to run solution, but received an exception: ${e}']);
   }
 }
 
-// returns true for success, false for failure and/or error
 Future<List> asyncStringEquals({String expected, String actual, List<String> messages}) async {
   try {
+//    print("Actual: $actual");
     if (expected == actual) {
       return [true];
     } else {
@@ -82,4 +86,3 @@ Future<List> asyncStringEquals({String expected, String actual, List<String> mes
     return [false, messages];
   }
 }
-
