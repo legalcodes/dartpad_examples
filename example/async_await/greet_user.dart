@@ -1,28 +1,74 @@
-Future<String> greetUser() async {
-  var username = await getUsername(); // Can take a while
-  return 'Hello $username';
+void _result(bool success, [List<String> messages]) {
+  final joinedMessages = messages?.map((m) => m.toString())?.join(',') ?? '';
+  print('success: $success, "messages": $joinedMessages');
 }
+
+///////////////////////////////////////
+///////////////////////////////////////
+///////////////////////////////////////
+///////////////////////////////////////
+
+Future<String> greetUser() async {
+  String username = await getUsername();
+  return 'Hello${username}';
+}
+
+///////////////////////////////////////
+///////////////////////////////////////
+///////////////////////////////////////
+///////////////////////////////////////
+
+
+const NO_ERROR='NO_ERROR';
 
 Future<String> getUsername() =>
-    Future.delayed(Duration(seconds: 2), () => 'Jean');
+    Future.delayed(Duration(seconds: 1), () => 'Jean');
 
 main() async {
-  await asyncStringEquals(
-      '==Should get User Name==',
-      'Hello Jean',
-      await greetUser()
-  );
+  try {
+    List<String> messages = [];
+
+    messages
+      ..add(await asyncStringEquals(
+        expected: 'Hello Jean',
+        actual: await greetUser(),
+      ))
+      ..removeWhere((m) => m == NO_ERROR);
+
+    Map<String, String> readable = {
+      'HelloJean' : 'Looks like you forgot the space between \'Hello\' and \'Jean\'!',
+    };
+
+    passIfNoMessages(messages, readable);
+
+  } catch (e) {
+    _result(false, ['Tried to run solution, but received an exception: ${e}']);
+  }
 }
 
-Future<void> asyncStringEquals(msg, expected, actual) async {
-  print(msg);
-  if (expected == actual) {
-    print('PASS: $actual');
-    return true;
+void passIfNoMessages(List<String> messages, Map<String, String> readable){
+  if (messages.isEmpty) {
+    _result(true);
   } else {
-    print("FAILED: ");
-    print("Expected: $expected");
-    print("Actual: $actual");
-    return false;
+
+    List<String> userMessages = messages
+        .where((message) => readable.containsKey(message))
+        .map((message) => readable[message])
+        .toList();
+    print(messages);
+
+    _result(false, userMessages);
+  }
+}
+
+Future<String> asyncStringEquals({String expected, String actual}) async {
+  try {
+    if (expected == actual) {
+      return NO_ERROR;
+    } else {
+      return actual;
+    }
+  } catch (e) {
+    return e.toString();
   }
 }
