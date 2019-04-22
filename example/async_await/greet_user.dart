@@ -9,8 +9,8 @@ void _result(bool success, [List<String> messages]) {
 ///////////////////////////////////////
 
 Future<String> greetUser() async {
-  String username = await getUsername();
-  return 'Hello${username}';
+  var username = getUsername();
+  return 'Hello ${username}';
 }
 
 ///////////////////////////////////////
@@ -37,6 +37,7 @@ main() async {
 
     Map<String, String> readable = {
       'HelloJean' : 'Looks like you forgot the space between \'Hello\' and \'Jean\'!',
+      'Hello Instance of \'Future<String>\'': 'Looks like you forgot to use the \'await\' keyword!',
     };
 
     passIfNoMessages(messages, readable);

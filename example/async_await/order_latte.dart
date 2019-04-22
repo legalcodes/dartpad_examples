@@ -8,7 +8,7 @@ void _result(bool success, [List<String> messages]) {
 ///////////////////////////////////////////////
 
 Future<String> reportOrder() async {
-  var order = getUserOrder();
+  var order = await getUserOrder();
   return 'Thanks! Your order is: $order';
 }
 
