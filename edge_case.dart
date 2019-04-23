@@ -14,7 +14,7 @@ Future<String> reportOrder() async {
 
 Future<String> reportChange() async {
   var change = await getDollarAmount();
-  return 'Change due: $change';
+  return 'My $change';
 }
 
 ///////////////////////////////////////////////
@@ -34,7 +34,6 @@ Future<String> getDollarAmount() =>
 
 main() async {
   try {
-    // ignore: omit_local_variable_types
     List<String> messages = [];
 
     // ignore: cascade_invocations
@@ -44,12 +43,12 @@ main() async {
         actual: await reportOrder(),
       ))
       ..add(await asyncStringEquals(
-        expected: 'Change due: 3.02',
+        expected: 'My 3.02',
         actual: await reportChange(),
       ))
       ..removeWhere((m) => m == noError);
 
-     // ignore: omit_local_variable_types
+    // ignore: omit_local_variable_types
      Map<String, String> readable = {
       'Change due: Instance of \'Future<String>\'': 'reportChange failed. Did you use the await keyword?',
       'Change due: Instance of \'_Future<String>\'': 'reportChange failed. Did you use the await keyword?',
@@ -70,8 +69,8 @@ void passIfNoMessages(List<String> messages, Map<String, String> readable){
   } else {
     // ignore: omit_local_variable_types
     List<String> userMessages = messages
-        .where((message) => readable.containsKey(message))
-        .map((message) => readable[message])
+//        .where((message) => readable.containsKey(message))
+//        .map((message) => readable[message])
         .toList();
     _result(false, userMessages);
   }
