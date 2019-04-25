@@ -11,8 +11,8 @@ void _result(bool success, [List<String> messages]) {
 String addHello(user) => 'Hello $user!';
 
 Future<String> greetUser() async {
-  var username = getUsername();
-  return addHello(username);
+  var username = await getUsername();
+  addHello(username);
 }
 
 ///////////////////////////////////////
@@ -40,12 +40,15 @@ main() async {
         expected: 'Hello Jerry!',
         actual: await addHello('Jerry'),
       ))
+      ..forEach((m) => print(m))
       ..removeWhere((m) => m == noError);
 
     // ignore: omit_local_variable_types
     Map<String, String> readable = {
       'HelloJean' : 'Looks like you forgot the space between \'Hello\' and \'Jean\'!',
       'Hello Instance of \'Future<String>\'!': 'Looks like you forgot to use the \'await\' keyword!',
+      'Hello Jerry': 'Your user greeting is missing an exclamation mark',
+      'null': 'Woops! Did you forget to return a value in one of your functions?',
     };
 
     passIfNoMessages(messages, readable);
@@ -70,12 +73,13 @@ void passIfNoMessages(List<String> messages, Map<String, String> readable){
   }
 }
 
+
 Future<String> asyncStringEquals({String expected, String actual}) async {
   try {
     if (expected == actual) {
       return noError;
     } else {
-      return actual;
+      return actual.toString();
     }
   } catch (e) {
     return e.toString();
