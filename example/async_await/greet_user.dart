@@ -40,7 +40,6 @@ main() async {
         expected: 'Hello Jerry!',
         actual: await addHello('Jerry'),
       ))
-      ..forEach((m) => print(m))
       ..removeWhere((m) => m == noError);
 
     // ignore: omit_local_variable_types
