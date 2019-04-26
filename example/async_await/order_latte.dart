@@ -51,10 +51,10 @@ main() async {
 
      // ignore: omit_local_variable_types
      Map<String, String> readable = {
-      'Change due: Instance of \'Future<String>\'': 'reportChange failed. Did you use the await keyword?',
-      'Change due: Instance of \'_Future<String>\'': 'reportChange failed. Did you use the await keyword?',
-      'Thanks! Your order is: Instance of \'Future<String>\'': 'reportOrder failed. Did you use the await keyword?',
-      'Thanks! Your order is: Instance of \'_Future<String>\'': 'reportOrder failed. Did you use the await keyword?',
+      'Change due: Instance of \'Future<String>\'': 'Test failed! reportChange failed. Did you use the await keyword?',
+      'Change due: Instance of \'_Future<String>\'': 'Test failed! reportChange failed. Did you use the await keyword?',
+      'Thanks! Your order is: Instance of \'Future<String>\'': 'Test failed! reportOrder failed. Did you use the await keyword?',
+      'Thanks! Your order is: Instance of \'_Future<String>\'': 'Test failed! reportOrder failed. Did you use the await keyword?',
     };
 
     passIfNoMessages(messages, readable);

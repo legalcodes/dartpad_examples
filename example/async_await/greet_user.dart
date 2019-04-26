@@ -45,10 +45,10 @@ main() async {
 
     // ignore: omit_local_variable_types
     Map<String, String> readable = {
-      'HelloJean' : 'Looks like you forgot the space between \'Hello\' and \'Jean\'!',
-      'Hello Instance of \'Future<String>\'!': 'Looks like you forgot to use the \'await\' keyword!',
-      'Hello Jerry': 'Your user greeting is missing an exclamation mark',
-      'null': 'Woops! Did you forget to return a value in one of your functions?',
+      'HelloJean' : 'Test failed! Looks like you forgot the space between \'Hello\' and \'Jean\'!',
+      'Hello Instance of \'Future<String>\'!': 'Test failed! Looks like you forgot to use the \'await\' keyword!',
+      'Hello Jerry': 'Test failed! Your user greeting is missing an exclamation mark',
+      'null': 'Test failed! Did you forget to return a value in one of your functions?',
     };
 
     passIfNoMessages(messages, readable);
@@ -69,7 +69,7 @@ void passIfNoMessages(List<String> messages, Map<String, String> readable){
         .map((message) => readable[message])
         .toList();
 
-    _result(false, userMessages);
+    _result(false, userMessages.isNotEmpty ? userMessages : ['Test failed!']);
   }
 }
 
