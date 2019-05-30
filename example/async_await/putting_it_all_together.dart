@@ -1,27 +1,13 @@
-void _result(bool success, [List<String> messages]) {
-  final joinedMessages = messages?.map((m) => m.toString())?.join(',') ?? '';
-  print('success: $success, "messages": $joinedMessages');
-}
 
-///////////////////////////////////////
-///////////////////////////////////////
-///////////////////////////////////////
-///////////////////////////////////////
 
 String addHello(user) => 'Hello $user!';
 
 Future<String> greetUser() async {
   var username = await getUsername();
-  addHello(username);
+  return addHello(username);
 }
 
-///////////////////////////////////////
-///////////////////////////////////////
-///////////////////////////////////////
-///////////////////////////////////////
-
-
-const noError='NO_ERROR';
+const NO_ERROR='NO_ERROR';
 
 Future<String> getUsername() =>
     Future.delayed(Duration(seconds: 1), () => 'Jean');
@@ -40,20 +26,18 @@ main() async {
         expected: 'Hello Jerry!',
         actual: await addHello('Jerry'),
       ))
-      ..removeWhere((m) => m == noError);
+      ..removeWhere((m) => m == NO_ERROR);
 
     // ignore: omit_local_variable_types
     Map<String, String> readable = {
-      'HelloJean' : 'Test failed! Looks like you forgot the space between \'Hello\' and \'Jean\'!',
-      'Hello Instance of \'Future<String>\'!': 'Test failed! Looks like you forgot to use the \'await\' keyword!',
-      'Hello Jerry': 'Test failed! Your user greeting is missing an exclamation mark',
-      'null': 'Test failed! Did you forget to return a value in one of your functions?',
+      'HelloJean' : 'Looks like you forgot the space between \'Hello\' and \'Jean\'!',
+      'Hello Instance of \'Future<String>\'': 'Looks like you forgot to use the \'await\' keyword!',
     };
 
     passIfNoMessages(messages, readable);
 
   } catch (e) {
-    _result(false, ['Tried to run solution, but received an exception: $e']);
+    _result(false, ['Tried to run solution, but received an exception: ${e}']);
   }
 }
 
@@ -67,18 +51,18 @@ void passIfNoMessages(List<String> messages, Map<String, String> readable){
         .where((message) => readable.containsKey(message))
         .map((message) => readable[message])
         .toList();
+    print(messages);
 
-    _result(false, userMessages.isNotEmpty ? userMessages : ['Test failed!']);
+    _result(false, userMessages);
   }
 }
-
 
 Future<String> asyncStringEquals({String expected, String actual}) async {
   try {
     if (expected == actual) {
-      return noError;
+      return NO_ERROR;
     } else {
-      return actual.toString();
+      return actual;
     }
   } catch (e) {
     return e.toString();

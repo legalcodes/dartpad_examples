@@ -26,7 +26,7 @@ const change = '3.02';
 const noError = 'NO_ERROR';
 const typoMessage = 'Test failed! Check for typos in your return value';
 const oneSecond = Duration(seconds: 1);
-// ignore: omit_local_variable_types
+
 Map<String, String> readable = {
   typoMessage: typoMessage,
   'Change due: Instance of \'Future<String>\'': 'Test failed! reportChange failed. Did you use the await keyword?',
@@ -52,6 +52,7 @@ main() async {
       ))
       ..removeWhere((m) => m == noError);
 
+    // TODO: move _result() call into main function
     passIfNoMessages(messages, readable);
   } catch (e) {
     _result(false, ['Tried to run solution, but received an exception: $e']);
@@ -73,6 +74,7 @@ void passIfNoMessages(List<String> messages, Map<String, String> readable){
   }
 }
 
+// TODO: call a message mapping function within the assertion
 Future<String> asyncStringEquals({String expected, String actual}) async {
   try {
     if (expected == actual) {
