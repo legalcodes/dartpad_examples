@@ -24,20 +24,23 @@ Future<String> reportChange() async {
 const order = 'almond milk';
 const change = '3.02';
 const noError = 'NO_ERROR';
+const typoMessage = 'Test failed! Check for typos in your return value';
 const oneSecond = Duration(seconds: 1);
+// ignore: omit_local_variable_types
+Map<String, String> readable = {
+  typoMessage: typoMessage,
+  'Change due: Instance of \'Future<String>\'': 'Test failed! reportChange failed. Did you use the await keyword?',
+  'Change due: Instance of \'_Future<String>\'': 'Test failed! reportChange failed. Did you use the await keyword?',
+  'Thanks! Your order is: Instance of \'Future<String>\'': 'Test failed! reportOrder failed. Did you use the await keyword?',
+  'Thanks! Your order is: Instance of \'_Future<String>\'': 'Test failed! reportOrder failed. Did you use the await keyword?',
+};
+List<String> messages = [];
 
-Future<String> getUserOrder() =>
-    Future.delayed(oneSecond, () => order);
-
-Future<String> getDollarAmount() =>
-    Future.delayed(oneSecond, () => change);
+Future<String> getUserOrder() => Future.delayed(oneSecond, () => order);
+Future<String> getDollarAmount() => Future.delayed(oneSecond, () => change);
 
 main() async {
   try {
-    // ignore: omit_local_variable_types
-    List<String> messages = [];
-
-    // ignore: cascade_invocations
     messages
       ..add(await asyncStringEquals(
         expected: 'Thanks! Your order is: almond milk',
@@ -49,16 +52,7 @@ main() async {
       ))
       ..removeWhere((m) => m == noError);
 
-     // ignore: omit_local_variable_types
-     Map<String, String> readable = {
-      'Change due: Instance of \'Future<String>\'': 'Test failed! reportChange failed. Did you use the await keyword?',
-      'Change due: Instance of \'_Future<String>\'': 'Test failed! reportChange failed. Did you use the await keyword?',
-      'Thanks! Your order is: Instance of \'Future<String>\'': 'Test failed! reportOrder failed. Did you use the await keyword?',
-      'Thanks! Your order is: Instance of \'_Future<String>\'': 'Test failed! reportOrder failed. Did you use the await keyword?',
-    };
-
     passIfNoMessages(messages, readable);
-
   } catch (e) {
     _result(false, ['Tried to run solution, but received an exception: $e']);
   }
@@ -70,6 +64,8 @@ void passIfNoMessages(List<String> messages, Map<String, String> readable){
   } else {
     // ignore: omit_local_variable_types
     List<String> userMessages = messages
+        .map((message) => message.contains(order) ? typoMessage : message)
+        .map((message) => message.contains(change) ? typoMessage : message)
         .where((message) => readable.containsKey(message))
         .map((message) => readable[message])
         .toList();
