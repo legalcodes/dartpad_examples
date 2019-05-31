@@ -23,57 +23,65 @@ Future<String> reportLogins() async {
 
 const role = 'administrator';
 const logins = 42;
-const noError = 'NO_ERROR';
+const passed = 'PASSED';
 const typoMessage = 'Test failed! Check for typos in your return value';
 const oneSecond = Duration(seconds: 1);
 List<String> messages = [];
-
-Map<String, String> readableErrors = {
-  typoMessage: typoMessage,
-  'User role: Instance of \'Future<String>\'': 'Part 1 Test failed! reportUserRole failed. Did you use the await keyword?',
-  'User role: Instance of \'_Future<String>\'': 'Part 1 Test failed! reportUserRole failed. Did you use the await keyword?',
-  'Total number of logins: Instance of \'Future<int>\'': 'Part 2 Test failed! reportLogins failed. Did you use the await keyword?',
-  'Total number of logins: Instance of \'_Future<int>\'': 'Part 2 Test failed! reportLogins failed. Did you use the await keyword?',
-};
-
 Future<String> getRole() => Future.delayed(oneSecond, () => role);
 Future<int> getLoginAmount() => Future.delayed(oneSecond, () => logins);
 
 main() async {
   try {
     messages
-      ..add(await asyncEquals(
-        expected: 'User role: administrator',
-        actual: await reportUserRole(),
-      ))
-      ..add(await asyncEquals(
-        expected: 'Total number of logins: 42',
-        actual: await reportLogins(),
-      ))
-      ..removeWhere((m) => m == noError);
+      ..add(makeReadable(
 
-    // TODO: move _result() call into main
-    passIfNoMessages(messages, readableErrors);
+        testLabel: 'Part 1',
+        testResult: await asyncEquals(
+          expected: 'User role: administrator',
+          actual: await reportUserRole(),
+          typoKeyword: role
+        ),
+        readableErrors: {
+          typoMessage: typoMessage,
+          'User role: Instance of \'Future<String>\'': 'Test failed! reportUserRole failed. Did you use the await keyword?',
+          'User role: Instance of \'_Future<String>\'': 'Test failed! reportUserRole failed. Did you use the await keyword?',
+        }))
+
+      ..add(makeReadable(
+
+        testLabel: 'Part 2',
+        testResult: await asyncEquals(
+          expected: 'Total number of logins: 42',
+          actual: await reportLogins(),
+          typoKeyword: logins.toString()
+        ),
+        readableErrors: {
+          typoMessage: typoMessage,
+          'Total number of logins: Instance of \'Future<int>\'': 'Test failed! reportLogins failed. Did you use the await keyword?',
+          'Total number of logins: Instance of \'_Future<int>\'': 'Test failed! reportLogins failed. Did you use the await keyword?',
+        }))
+      ..removeWhere((m) => m.contains(passed))
+      ..toList();
+
+    if (messages.isEmpty) {
+      _result(true);
+    } else {
+      _result(false, messages);
+    }
   } catch (e) {
     _result(false, ['Tried to run solution, but received an exception: $e']);
   }
 }
 
-void passIfNoMessages(List<String> messages, Map<String, String> readableErrors){
-  if (messages.isEmpty) {
-    _result(true);
+////////////////////////////////////////
+///////////// Test Helpers /////////////
+////////////////////////////////////////
+String makeReadable({ String testResult, Map readableErrors, String testLabel }) {
+  if (readableErrors.containsKey(testResult)) {
+    var readable = readableErrors[testResult];
+    return '$testLabel $readable';
   } else {
-    // TODO: move mapping-error-messages logic into separate function
-    // check for WHICH test failed
-    print(messages);
-    // ignore: omit_local_variable_types
-    List<String> userMessages = messages
-        .map((message) => message.contains(role) ? typoMessage : message)
-        .map((message) => message.contains(logins.toString()) ? typoMessage : message)
-        .where((message) => readableErrors.containsKey(message))
-        .map((message) => readableErrors[message])
-        .toList();
-    _result(false, userMessages);
+    return '$testLabel $testResult';
   }
 }
 
@@ -81,15 +89,17 @@ void passIfNoMessages(List<String> messages, Map<String, String> readableErrors)
 //////////// Assertions ///////////////
 ///////////////////////////////////////
 
-// TODO: call a message mapping function within the assertions
-Future<String> asyncEquals({expected, actual}) async {
+Future<String> asyncEquals({expected, actual, String typoKeyword}) async {
+  var strActual = actual is String ? actual : actual.toString();
   try {
     if (expected == actual) {
-      return noError;
+      return passed;
+    } else if (strActual.contains(typoKeyword)) {
+      return typoMessage;
     } else {
-      return actual;
+      return strActual;
     }
   } catch(e) {
-    return e.toString();
+    return e;
   }
 }
