@@ -31,6 +31,8 @@ Future<String> getRole() => Future.delayed(oneSecond, () => role);
 Future<int> getLoginAmount() => Future.delayed(oneSecond, () => logins);
 
 main() async {
+  var safeReportLogins = (reportLogins ?? () => Future.delayed(oneSecond, () => 'NOT PRESENT'));
+
   try {
     messages
       ..add(makeReadable(
@@ -38,13 +40,15 @@ main() async {
         testLabel: 'Part 1',
         testResult: await asyncEquals(
           expected: 'User role: administrator',
-          actual: await reportUserRole(),
+          actual: await (reportUserRole() ?? () => Future.delayed(oneSecond, () => null)),
           typoKeyword: role
         ),
         readableErrors: {
           typoMessage: typoMessage,
           'User role: Instance of \'Future<String>\'': 'Test failed! reportUserRole failed. Did you use the await keyword?',
           'User role: Instance of \'_Future<String>\'': 'Test failed! reportUserRole failed. Did you use the await keyword?',
+          'User role:' : 'Test failed! Did you return a username?',
+          'User role: ' : 'Test failed! Did you return a username?',
         }))
 
       ..add(makeReadable(
@@ -52,13 +56,16 @@ main() async {
         testLabel: 'Part 2',
         testResult: await asyncEquals(
           expected: 'Total number of logins: 42',
-          actual: await reportLogins(),
+          actual: await (safeReportLogins ?? () => Future.delayed(oneSecond, () => null)),
           typoKeyword: logins.toString()
         ),
         readableErrors: {
           typoMessage: typoMessage,
           'Total number of logins: Instance of \'Future<int>\'': 'Test failed! reportLogins failed. Did you use the await keyword?',
           'Total number of logins: Instance of \'_Future<int>\'': 'Test failed! reportLogins failed. Did you use the await keyword?',
+          'Total number of logins: ': 'Test failed! Did you return the number of logins?',
+          'Total number of logins:': 'Test failed! Did you return the number of logins?',
+          'NOT PRESENT': 'Test failed! You have not defined a reportLogins function',
         }))
       ..removeWhere((m) => m.contains(passed))
       ..toList();

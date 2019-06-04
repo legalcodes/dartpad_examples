@@ -1,4 +1,11 @@
+void _result(bool success, [List<String> messages]) {
+  final joinedMessages = messages?.map((m) => m.toString())?.join(',') ?? '';
+  print('success: $success, "messages": $joinedMessages');
+}
 
+///////////////////////////////////////////////
+/////////////// SOLUTION //////////////////////
+///////////////////////////////////////////////
 
 String addHello(user) => 'Hello $user!';
 
@@ -7,37 +14,90 @@ Future<String> greetUser() async {
   return addHello(username);
 }
 
-const NO_ERROR='NO_ERROR';
+Future<String>sayGoodbye() async {
+  try {
+    var result = await logoutUser();
+    return result;
+  } catch (e) {
+    return 'Failed to logout user:';
+  }
+}
 
-Future<String> getUsername() =>
-    Future.delayed(Duration(seconds: 1), () => 'Jean');
+///////////////////////////////////////////////
+//////////////TEST CODE //////////////////
+///////////////////////////////////////////////
+
+List<String> messages = [];
+const passed = 'PASSED';
+const noCatch = 'NO_CATCH';
+const typoMessage = 'Test failed! Check for typos in your return value';
+const oneSecond = Duration(seconds: 1);
+
+Future<String> getUsername() => Future.delayed(oneSecond, () => 'Jean');
+logoutUser() => Future.delayed(oneSecond, () => throw Exception('Logout failed'));
 
 main() async {
   try {
-    List<String> messages = [];
-
     // ignore: cascade_invocations
     messages
-      ..add(await asyncStringEquals(
-        expected: 'Hello Jean!',
-        actual: await greetUser(),
-      ))
-      ..add(await asyncStringEquals(
+      ..add(makeReadable(
+
+        testLabel: 'Part 1',
+        testResult: await asyncEquals(
+          expected: 'Hello Jean!',
+          actual: await greetUser(),
+          typoKeyword: 'Jean'
+        ),
+        readableErrors: {
+          typoMessage: typoMessage,
+          'HelloJean' : 'Looks like you forgot the space between \'Hello\' and \'Jean\'!',
+          'Hello Instance of \'Future<String>\'!': 'Looks like you forgot to use the \'await\' keyword!',
+          'Hello Instance of \'_Future<String>\'!': 'Looks like you forgot to use the \'await\' keyword!',
+        }))
+    ..add(makeReadable(
+
+      testLabel: 'Part 2',
+      testResult: await asyncEquals(
         expected: 'Hello Jerry!',
-        actual: await addHello('Jerry'),
+        actual: addHello('Jerry'),
+        typoKeyword: 'Jerry'
+      ),
+      readableErrors: {
+        typoMessage: typoMessage,
+        'Hello Instance of \'Future<String>\'!': 'Looks like you forgot to use the \'await\' keyword!',
+        'Hello Instance of \'_Future<String>\'!': 'Looks like you forgot to use the \'await\' keyword!',
+      }))
+      ..add(makeReadable(
+        testLabel: 'Part 3',
+        testResult: await asyncDidCatchException(sayGoodbye),
+        readableErrors: {
+          typoMessage: typoMessage,
+          noCatch: 'Did you remember to call logoutUser within a try/catch block?',
+          'Instance of \'_Future<String>\'':'Did you remember to use the \'await\' keyword in the sayGoodbye function?',
+        }
       ))
-      ..removeWhere((m) => m == NO_ERROR);
+    ..removeWhere((m) => m.contains(passed))
+    ..toList();
 
-    // ignore: omit_local_variable_types
-    Map<String, String> readable = {
-      'HelloJean' : 'Looks like you forgot the space between \'Hello\' and \'Jean\'!',
-      'Hello Instance of \'Future<String>\'': 'Looks like you forgot to use the \'await\' keyword!',
-    };
-
-    passIfNoMessages(messages, readable);
-
+    if (messages.isEmpty) {
+      _result(true);
+    } else {
+      _result(false, messages);
+    }
   } catch (e) {
     _result(false, ['Tried to run solution, but received an exception: ${e}']);
+  }
+}
+
+////////////////////////////////////////
+///////////// Test Helpers /////////////
+////////////////////////////////////////
+String makeReadable({ String testResult, Map readableErrors, String testLabel }) {
+  if (readableErrors.containsKey(testResult)) {
+    var readable = readableErrors[testResult];
+    return '$testLabel $readable';
+  } else {
+    return '$testLabel $testResult';
   }
 }
 
@@ -56,15 +116,36 @@ void passIfNoMessages(List<String> messages, Map<String, String> readable){
     _result(false, userMessages);
   }
 }
+///////////////////////////////////////
+//////////// Assertions ///////////////
+///////////////////////////////////////
 
-Future<String> asyncStringEquals({String expected, String actual}) async {
+Future<String> asyncEquals({expected, actual, String typoKeyword}) async {
+  var strActual = actual is String ? actual : actual.toString();
   try {
     if (expected == actual) {
-      return NO_ERROR;
+      return passed;
+    } else if (strActual.contains(typoKeyword)) {
+      return typoMessage;
     } else {
-      return actual;
+      return strActual;
     }
-  } catch (e) {
-    return e.toString();
+  } catch(e) {
+    return e;
+  }
+}
+
+Future<String> asyncDidCatchException(Function fn) async {
+  var caught = true;
+  try {
+    await fn();
+  } on Exception catch(e) {
+    caught = false;
+  }
+
+  if (caught == true) {
+    return passed;
+  } else {
+    return noCatch;
   }
 }

@@ -6,7 +6,10 @@ void _result(bool success, [List<String> messages]) {
 ///////////////////////////////////////////////
 //////DO NOT COPY ABOVE THIS COMMENT///////////
 ///////////////////////////////////////////////
-const userError = 'New username is invalid';
+//const userError =
+class UserError implements Exception {
+  String errMsg() => 'New username is invalid';
+}
 
 
 Future changeUsername () async {
@@ -18,7 +21,7 @@ Future changeUsername () async {
 }
 
 Future getNewUsername() {
-  var str = Future.delayed(Duration(seconds: 2), () => throw userError);
+  var str = Future.delayed(Duration(seconds: 2), () => throw UserError());
   return str;
 }
 
