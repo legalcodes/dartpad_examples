@@ -17,9 +17,9 @@ Future<String> greetUser() async {
 Future<String>sayGoodbye() async {
   try {
     var result = await logoutUser();
-    return result;
+    return '$result Thanks, see you next time';
   } catch (e) {
-    return 'Failed to logout user:';
+    return 'Failed to logout user: $e';
   }
 }
 
@@ -28,13 +28,23 @@ Future<String>sayGoodbye() async {
 ///////////////////////////////////////////////
 
 List<String> messages = [];
+bool logoutSucceeds = false;
 const passed = 'PASSED';
 const noCatch = 'NO_CATCH';
 const typoMessage = 'Test failed! Check for typos in your return value';
 const oneSecond = Duration(seconds: 1);
 
 Future<String> getUsername() => Future.delayed(oneSecond, () => 'Jean');
-logoutUser() => Future.delayed(oneSecond, () => throw Exception('Logout failed'));
+String failOnce () {
+  if (logoutSucceeds) {
+    return 'Success!';
+  } else {
+    logoutSucceeds = true;
+    throw Exception('Logout failed');
+  }
+}
+
+logoutUser() => Future.delayed(oneSecond, failOnce);
 
 main() async {
   try {
@@ -73,8 +83,21 @@ main() async {
         readableErrors: {
           typoMessage: typoMessage,
           noCatch: 'Did you remember to call logoutUser within a try/catch block?',
-          'Instance of \'_Future<String>\'':'Did you remember to use the \'await\' keyword in the sayGoodbye function?',
+          'Instance of \'Future<String>\' Thanks, see you next time':'Did you remember to use the \'await\' keyword in the sayGoodbye function?',
         }
+      ))
+      ..add(makeReadable(
+        testLabel: 'Part 3',
+        testResult: await asyncEquals(
+          expected: 'Success! Thanks, see you next time',
+          actual: await sayGoodbye(),
+          typoKeyword: 'Success'
+        ),
+        readableErrors: {
+          typoMessage: typoMessage,
+          noCatch: 'Did you remember to call logoutUser within a try/catch block?',
+          'Instance of \'Future<String>\' Thanks, see you next time':'Did you remember to use the \'await\' keyword in the sayGoodbye function?',
+          }
       ))
     ..removeWhere((m) => m.contains(passed))
     ..toList();
